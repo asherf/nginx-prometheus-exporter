@@ -162,7 +162,6 @@ func main() {
 	log.Printf("Starting NGINX Prometheus Exporter Version=%v GitCommit=%v", version, gitCommit)
 
 	registry := prometheus.NewRegistry()
-
 	buildInfoMetric := prometheus.NewGauge(
 		prometheus.GaugeOpts{
 			Name: "nginxexporter_build_info",
@@ -200,8 +199,9 @@ func main() {
 		}
 		registry.MustRegister(collector.NewNginxPlusCollector(plusClient.(*plusclient.NginxClient), "nginxplus"))
 	} else {
+		appName := fmt.Sprintf("NGINX-Prometheus-Exporter/v%s", version)
 		ossClient, err := createClientWithRetries(func() (interface{}, error) {
-			return client.NewNginxClient(httpClient, *scrapeURI)
+			return client.NewNginxClient(httpClient, *scrapeURI, appName)
 		}, *nginxRetries, nginxRetryInterval.Duration)
 		if err != nil {
 			log.Fatalf("Could not create Nginx Client: %v", err)
